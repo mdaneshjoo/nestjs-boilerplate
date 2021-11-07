@@ -17,7 +17,7 @@ import { HttpLoggerService } from './shared/module/logger/http-logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.use(helmet());
+
   app.enableCors({
     origin: '*',
     allowedHeaders: '*',
@@ -34,6 +34,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionFilter(await logger, appConfigService));
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe(validations));
+  app.use(helmet());
   const config = new DocumentBuilder()
     .setTitle('Webcentriq Profile API Documents.')
     .setDescription('')

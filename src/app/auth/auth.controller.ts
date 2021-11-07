@@ -1,4 +1,5 @@
-import { Body, Controller, Post, Request } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { LoginDec } from './auth.decorator';
 import { AuthService } from './auth.service';
@@ -11,7 +12,7 @@ export class AuthController {
 
   @Post('login')
   @LoginDec()
-  async login(@Request() req, @Body() body: LoginDto) {
+  async login(@Req() req: Request, @Body() body: LoginDto) {
     return this.authService.login(req.user);
   }
 }

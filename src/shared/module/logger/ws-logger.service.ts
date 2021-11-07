@@ -21,9 +21,9 @@ export class WsLoggerService extends ConsoleLogger implements LoggerService {
     this.context = context;
     super.setContext(context);
   }
-  throwType = {
-    // WsException: WsException,
-  };
+  // throwType = {
+  //   // WsException: WsException,
+  // };
 
   debug(message: string, meta?: any, userId?: string) {
     this.winstonLogger.debug(message, {
@@ -45,7 +45,7 @@ export class WsLoggerService extends ConsoleLogger implements LoggerService {
         context: this.context,
         userId,
       });
-      throw new this.throwType[throwType](meta);
+      // throw new this.throwType[throwType](meta);
     }
   }
 }

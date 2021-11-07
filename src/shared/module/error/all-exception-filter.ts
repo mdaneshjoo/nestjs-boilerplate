@@ -8,6 +8,7 @@ import {
 import { BaseExceptionFilter } from '@nestjs/core';
 import { AppConfigService } from '../../../config/app/config/config.service';
 import { HttpLoggerService } from '../logger/http-logger.service';
+import { Request } from 'express';
 
 @Catch()
 export class AllExceptionFilter
@@ -45,7 +46,7 @@ export class AllExceptionFilter
     if (request?.body['password']) delete request?.body['password'];
     this.loggerService.error('HttpException', exceptionData.message, {
       body: request?.body,
-      user: request['user']?.id,
+      user: request.user?.id,
     });
 
     response.status(status).json({
