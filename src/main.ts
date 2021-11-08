@@ -3,7 +3,7 @@ import {
   ValidationPipe,
   ValidationPipeOptions,
 } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import {
   DocumentBuilder,
   SwaggerModule,
@@ -11,6 +11,8 @@ import {
 } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as helmet from 'helmet';
+import { AuthService } from './app/auth/auth.service';
+import { PermissionsGuard } from './app/auth/guards/permission.guard';
 import { AppConfigService } from './config/app/config/config.service';
 import { AllExceptionFilter } from './shared/module/error/all-exception-filter';
 import { HttpLoggerService } from './shared/module/logger/http-logger.service';
@@ -31,7 +33,10 @@ async function bootstrap() {
   const appConfigService = app.get<AppConfigService>(AppConfigService);
   const logger = app.resolve<HttpLoggerService>(HttpLoggerService);
 
+  const authService = app.resolve<AuthService>(AuthService);
+
   app.useGlobalFilters(new AllExceptionFilter(await logger, appConfigService));
+  app.useGlobalGuards(new PermissionsGuard(new Reflector(), await authService));
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe(validations));
   app.use(helmet());

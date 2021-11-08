@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConsoleModule } from '@squareboat/nest-console';
 import { PermissionsRepository } from '../app/roles/repositories/permissions.repository';
 import { RolesRepository } from '../app/roles/repositories/roles.repository';
+import { RolesModule } from '../app/roles/roles.module';
+import { RolesService } from '../app/roles/roles.service';
 import { UserModule } from '../app/user/user.module';
 import { PrivilegesCommands } from './privileges.command';
 

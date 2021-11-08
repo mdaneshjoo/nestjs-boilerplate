@@ -35,6 +35,9 @@ export class User extends CommonEntity {
   @Column({ nullable: true })
   joinDate: Date;
 
+  @Column({ default: false })
+  needChangePassword: boolean;
+
   @ManyToMany(() => Roles)
   @JoinTable()
   role: Roles[];

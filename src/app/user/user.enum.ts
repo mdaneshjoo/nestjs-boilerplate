@@ -1,22 +1,22 @@
-import { PermissionsEnum } from '../auth/permissions/permissions.enum';
-import { Roles } from '../roles/entities/roles.entity';
-
-export enum CreateUserErrEnum {
+export enum CreateUserErrCodeEnum {
   /**
    * message: USER_DUPLICATE
    * **/
-  USER_DUPLICATE_CODE = 'USER_DUPLICATE',
+  USER_DUPLICATE = 'USER_DUPLICATE',
 
+  /**
+   * message: ROLE_NOT_FOUND
+   * **/
+  ROLE_NOT_FOUND = 'ROLE_NOT_FOUND',
+}
+export enum CreateUserErrMsgEnum {
   /**
    * message: user already exist
    * **/
-  USER_DUPLICATE_MSG = 'user already exist',
-}
+  USER_DUPLICATE = 'user already exist',
 
-export const ConstRoles: { [key: string]: Roles } = {
-  Admin: {
-    roleName: 'admin',
-    description: 'this is admin role',
-    createdBy: 0,
-  },
-};
+  /**
+   * message: not found any roles to assign! please contact with your admin
+   * **/
+  ROLE_NOT_FOUND = 'not found any roles to assign! please contact with your admin.',
+}

@@ -4,20 +4,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './app/auth/auth.module';
-import { AuthService } from './app/auth/auth.service';
-import { JwtAuthGuard } from './app/auth/passport/jwt-auth.guard';
-import { PermissionsGuard } from './app/auth/permissions/permission.guard';
+import { JwtAuthGuard } from './app/auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from './app/auth/guards/permission.guard';
 import { CreditModule } from './app/employee/credit/credit.module';
 import { StacksModule } from './app/employee/stacks/stacks.module';
 import { ProfileModule } from './app/profile/profile.module';
+import { RolesModule } from './app/roles/roles.module';
 import { UserModule } from './app/user/user.module';
 import { PrivilegesModule } from './commands/privileges.module';
 import { AppConfigModule } from './config/app/config/config.module';
-import { AppConfigService } from './config/app/config/config.service';
 import { DataBaseConfigModule } from './config/database/config.module';
 import { DataBaseConfigService } from './config/database/config.service';
 import { CustomLoggerModule } from './shared/module/logger/logger.module';
-import { RolesModule } from './app/roles/roles.module';
 
 @Module({
   imports: [
@@ -54,10 +52,6 @@ import { RolesModule } from './app/roles/roles.module';
     RolesModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
-    { provide: APP_GUARD, useClass: PermissionsGuard },
-  ],
+  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
 export class AppModule {}

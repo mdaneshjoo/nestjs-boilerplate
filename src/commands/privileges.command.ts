@@ -1,18 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { Command } from '@squareboat/nest-console';
-import { _cli } from '@squareboat/nest-console';
+import { Injectable, Scope } from '@nestjs/common';
+import { _cli, Command } from '@squareboat/nest-console';
 import * as Joi from 'joi';
-import { PermissionsEnum } from '../app/auth/permissions/permissions.enum';
 import { Permissions } from '../app/roles/entities/permissions.entity';
+import { Roles } from '../app/roles/entities/roles.entity';
+import {
+  DefaultRolePermissionsEnum,
+  PermissionsEnum,
+} from '../app/roles/permissions.enum';
 import { PermissionsRepository } from '../app/roles/repositories/permissions.repository';
 import {
   FindOrCreateResult,
   RolesRepository,
 } from '../app/roles/repositories/roles.repository';
-import { ConstRoles, CreateUserErrEnum } from '../app/user/user.enum';
+import { ConstRoles } from '../app/roles/role.enum';
+import { RolesService } from '../app/roles/roles.service';
+import { CreateUserErrMsgEnum } from '../app/user/user.enum';
 import { UserService } from '../app/user/user.service';
 
-@Injectable()
+@Injectable({ scope: Scope.DEFAULT })
 export class PrivilegesCommands {
   constructor(
     private userService: UserService,
@@ -25,8 +30,13 @@ export class PrivilegesCommands {
     try {
       const email = await PrivilegesCommands.getEmail();
       const existUser = await this.userService.findOne(email);
-      if (existUser) throw new Error(CreateUserErrEnum.USER_DUPLICATE_MSG);
-      const role = await this.createAdminRole();
+      if (existUser) throw new Error(CreateUserErrMsgEnum.USER_DUPLICATE);
+      const role = await this.createRole(
+        ConstRoles.Admin.roleName,
+        ConstRoles.Admin,
+        PermissionsEnum.MANAGE,
+        'can do anything',
+      );
       await this.userService.create({
         workEmail: email,
         firstName: 'SuperUser',
@@ -41,42 +51,75 @@ export class PrivilegesCommands {
   }
   @Command('create:permissions', { desc: 'create all permissions' })
   async saveAllPermissions() {
-    let i = 0;
-    for (const permission in PermissionsEnum) {
-      const { created } = await this.createPermissions({
-        permissionsName: PermissionsEnum[permission],
-        createdBy: 0,
-      });
-      _cli.info(
-        created
-          ? `Permission ${PermissionsEnum[permission]} created!`
-          : `Permission ${PermissionsEnum[permission]} already exist!`,
+    try {
+      let i = 0;
+      for (const permission in PermissionsEnum) {
+        const { created } = await this.createPermissions({
+          permissionsName: PermissionsEnum[permission],
+          createdBy: 0,
+        });
+        _cli.info(
+          created
+            ? `Permission ${PermissionsEnum[permission]} created!`
+            : `Permission ${PermissionsEnum[permission]} already exist!`,
+        );
+        if (created) i++;
+      }
+      _cli.success(
+        i
+          ? `All (${i}) Permissions Created!`
+          : 'Permissions already is up to date',
       );
-      if (created) i++;
+    } catch (e) {
+      console.log(e);
     }
-    _cli.success(
-      i
-        ? `All (${i}) Permissions Created!`
-        : 'Permissions already is up to date',
-    );
   }
 
-  private async createAdminRole() {
+  @Command('create:default-role')
+  async createDefaultRole() {
+    let i = 0;
+    let createdRole;
+    for (const permission in DefaultRolePermissionsEnum) {
+      const role = await this.createRole(
+        ConstRoles.User.roleName,
+        ConstRoles.User,
+        DefaultRolePermissionsEnum[permission],
+        '',
+      );
+      if (i === 0) createdRole = role.roleName;
+      i++;
+      _cli.info(
+        `Permission ${DefaultRolePermissionsEnum[permission]} assigned to role ${role.roleName}`,
+      );
+    }
+    _cli.success(`Default role (${createdRole}) created!`);
+    _cli.success(`All (${i}) Permissions assigned to default role !`);
+  }
+
+  private async createRole(
+    roleName: string,
+    roleData: Roles,
+    permissionName: string,
+    permissionsDesc: string,
+  ) {
     const { result: permission } = await this.createPermissions({
-      permissionsName: PermissionsEnum.MANAGE,
-      description: 'can do anything',
+      permissionsName: permissionName,
+      description: permissionsDesc,
       createdBy: 0,
     });
     const { result: role } = await this.roleRepository.findOrCreate(
-      { roleName: ConstRoles.Admin.roleName },
-      ConstRoles.Admin,
+      { roleName: roleName },
+      roleData,
     );
 
     role.permissions = [permission];
     return await this.roleRepository.save(role);
   }
 
-  private async createPermissions(
+  /**
+   * @desc if permission not exist will created it else return exist permission
+   * */
+  async createPermissions(
     permission: Permissions,
   ): Promise<FindOrCreateResult<Permissions>> {
     return await this.permissionRepository.findOrCreate(
@@ -86,7 +129,6 @@ export class PrivilegesCommands {
       permission,
     );
   }
-
   private static async getEmail(): Promise<string> {
     const emailSchema = Joi.object({
       workEmail: Joi.string().email().required(),

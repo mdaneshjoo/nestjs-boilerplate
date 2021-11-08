@@ -1,4 +1,5 @@
 import { RoleInterface } from '../../roles/interfaces/role.interface';
+import { SignupDto } from '../dto/signup.dto';
 
 export interface PayloadInterface {
   id: number;
@@ -6,3 +7,5 @@ export interface PayloadInterface {
   iat: number;
   exp: number;
 }
+export type SignUpBodyInterface = SignUpBodyI & SignupDto;
+interface SignUpBodyI {}

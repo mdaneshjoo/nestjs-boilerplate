@@ -14,11 +14,17 @@ export class UserDto {
   @IsOptional()
   joinDate?: Date;
 
+  /**
+   * @example 'Due'
+   * */
   @IsOptional()
   @IsString()
   @MinLength(3)
   lastName?: string;
 
+  /**
+   * @example 'Jon'
+   * */
   @IsOptional()
   @IsString()
   @MinLength(3)
@@ -28,6 +34,9 @@ export class UserDto {
   @IsString()
   nickName?: string;
 
+  /**
+   * @example '+16505130514'
+   * */
   @IsOptional()
   @IsPhoneNumber()
   phoneNumber?: string;

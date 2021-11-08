@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ExtractJwt } from 'passport-jwt';
-import { RolesService } from '../roles/roles.service';
 import { User } from '../user/entities/user.entity';
-import { UserRepository } from '../user/repositories/user.repository';
 import { UserService } from '../user/user.service';
-import { PayloadInterface } from './interfaces/auth.interface';
-import fromAuthHeaderWithScheme = ExtractJwt.fromAuthHeaderWithScheme;
+import {
+  PayloadInterface,
+  SignUpBodyInterface,
+} from './interfaces/auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -23,11 +23,15 @@ export class AuthService {
     return null;
   }
 
-  public login(user: User) {
+  public login(user: User): string {
     return this.createToken(user);
   }
 
-  private createToken(user: User) {
+  /**
+   * @desc create token for user
+   * TODO: need to check if user not have permission dont allow to signup and revert creating user (transaction)
+   * */
+  private createToken(user: User): string {
     const role = user.role.map((role) => {
       const permissions = role.permissions.map(({ permissionsName, id }) => ({
         id,
@@ -37,9 +41,7 @@ export class AuthService {
     });
 
     const payload = { id: user.id, sub: { role } };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    return this.jwtService.sign(payload);
   }
 
   getUserPermissions(user: PayloadInterface): string[] {
@@ -52,5 +54,10 @@ export class AuthService {
           );
       });
     return [...new Set(permissions)];
+  }
+
+  async signUp(bodyData: SignUpBodyInterface): Promise<string> {
+    const user = await this.userService.create(bodyData);
+    return this.createToken(user);
   }
 }

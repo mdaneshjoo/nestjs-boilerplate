@@ -9,7 +9,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger as WinstonLogger } from 'winston';
 // Types
 type ErrorType = 'Internal' | 'HttpException';
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class HttpLoggerService extends ConsoleLogger implements LoggerService {
   private _path: string;
   constructor(
@@ -22,7 +22,7 @@ export class HttpLoggerService extends ConsoleLogger implements LoggerService {
   debug(message: string, meta?: any, context?: string) {
     this.winstonLogger.debug(message, {
       meta,
-      context,
+      context: this._path,
     });
   }
 

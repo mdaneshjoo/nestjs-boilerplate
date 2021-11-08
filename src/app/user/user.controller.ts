@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { RequirePermissions } from '../../shared/decorator/permission-api.decorator';
-import { PermissionsEnum } from '../auth/permissions/permissions.enum';
+import { PermissionsEnum } from '../roles/permissions.enum';
 import { CreateUserDto } from './dto';
 import { CreateUserDec } from './user.decorator';
 
