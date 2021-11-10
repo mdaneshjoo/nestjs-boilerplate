@@ -1,9 +1,36 @@
-import { Body, Controller, Post, Put, Req } from '@nestjs/common';
-import { Request } from 'express';
+import {
+  Body,
+  Controller,
+  Post,
+  Put,
+  Req,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { LoginDec, SignupDec } from './auth.decorator';
+import { Request } from 'express';
+import { Public } from '../../shared/decorator/public-api.decorator';
+import {
+  ForgetPassConfirmDec,
+  ForgetPassDec,
+  LoginDec,
+  SignupDec,
+} from './auth.decorator';
+import {
+  ForgetPassConfirmSuccessCodeEnum,
+  ForgetPassConfirmSuccessMsgEnum,
+  ForgetPassSuccessCodeEnum,
+  ForgetPassSuccessMsgEnum,
+  SignupSuccessCodeEnum,
+  SignupSuccessMsgEnum,
+} from './auth.enum';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResponseDto } from './dto';
+import {
+  ForgetPassConfirmDto,
+  ForgetPassConfirmResponseDto,
+  LoginDto,
+  LoginResponseDto,
+} from './dto';
+import { ForgetPassDto, ForgetPassResponseDto } from './dto/forget-pass.dto';
 import { SignupDto, SignUpResponseDto } from './dto/signup.dto';
 
 @ApiTags('auth')
@@ -26,12 +53,39 @@ export class AuthController {
   @Post('signup')
   @SignupDec()
   async signUp(@Body() body: SignupDto): Promise<SignUpResponseDto> {
-    const payload = await this.authService.signUp(body);
-    return { access_token: payload };
+    await this.authService.signUp(body);
+    return {
+      successCode: SignupSuccessCodeEnum.CODE,
+      message: SignupSuccessMsgEnum.MESSAGE,
+    };
   }
 
+  @Post('signup/confirm')
+  async confirmSignup() {}
+
   @Post('forget-password')
-  async forgetPass() {}
+  @ForgetPassDec()
+  async forgetPass(
+    @Body() bodyDto: ForgetPassDto,
+  ): Promise<ForgetPassResponseDto> {
+    await this.authService.forgetPass(bodyDto.email);
+    return {
+      successCode: ForgetPassSuccessCodeEnum.CODE,
+      message: ForgetPassSuccessMsgEnum.MESSAGE,
+    };
+  }
+
+  @Post('forget-pass/confirm')
+  @ForgetPassConfirmDec()
+  async forgetPassConfirm(
+    @Body() body: ForgetPassConfirmDto,
+  ): Promise<ForgetPassConfirmResponseDto> {
+    await this.authService.forgetPassConfirm(body);
+    return {
+      successCode: ForgetPassConfirmSuccessCodeEnum.CODE,
+      message: ForgetPassConfirmSuccessMsgEnum.MESSAGE,
+    };
+  }
 
   @Put('change-password')
   async changePass() {}
@@ -40,5 +94,8 @@ export class AuthController {
   async changePhoneNumber() {}
 
   @Put('change-email')
-  async changeEmail() {}
+  @Public()
+  async changeEmail() {
+    throw new UnprocessableEntityException('asdadasda');
+  }
 }

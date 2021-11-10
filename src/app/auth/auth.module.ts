@@ -5,6 +5,7 @@ import { AppConfigModule } from '../../config/app/config/config.module';
 import { AppConfigService } from '../../config/app/config/config.service';
 import { AuthConfigModule } from '../../config/auth/config.module';
 import { AuthConfigService } from '../../config/auth/config.service';
+import { MailModule } from '../../shared/module/mail/mail.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -31,6 +32,7 @@ import { PermissionsGuard } from './guards/permission.guard';
       }),
       inject: [AuthConfigService, AppConfigService],
     }),
+    MailModule,
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy, AuthConfigService],
   controllers: [AuthController],

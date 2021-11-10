@@ -1,11 +1,13 @@
+import { EyeModule, WebHookProviderEnum } from '@emdjoo/eye';
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './app/auth/auth.module';
 import { JwtAuthGuard } from './app/auth/guards/jwt-auth.guard';
-import { PermissionsGuard } from './app/auth/guards/permission.guard';
 import { CreditModule } from './app/employee/credit/credit.module';
 import { StacksModule } from './app/employee/stacks/stacks.module';
 import { ProfileModule } from './app/profile/profile.module';
@@ -15,12 +17,19 @@ import { PrivilegesModule } from './commands/privileges.module';
 import { AppConfigModule } from './config/app/config/config.module';
 import { DataBaseConfigModule } from './config/database/config.module';
 import { DataBaseConfigService } from './config/database/config.service';
+import { MailmanConfigModule } from './config/mailman/config.module';
 import { CustomLoggerModule } from './shared/module/logger/logger.module';
+import { MailModule } from './shared/module/mail/mail.module';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
+    HttpModule,
+    EyeModule.forRoot({
+      url: 'https://discord.com/api/webhooks/907688163760287754/3hl4vsEuvZnb84xqXnIsqb_apQRInHUQqKDw4Sn8h0ywgqOC7TwKXxG9z8a4_ksNr5mJ',
+      webHookProvider: WebHookProviderEnum.discord,
+    }),
     TypeOrmModule.forRootAsync({
       imports: [DataBaseConfigModule],
       useFactory: (dbConfigService: DataBaseConfigService) => ({
@@ -43,6 +52,7 @@ import { CustomLoggerModule } from './shared/module/logger/logger.module';
       }),
       inject: [DataBaseConfigService],
     }),
+    ScheduleModule.forRoot(),
     StacksModule,
     ProfileModule,
     CreditModule,
@@ -50,6 +60,8 @@ import { CustomLoggerModule } from './shared/module/logger/logger.module';
     CustomLoggerModule,
     PrivilegesModule,
     RolesModule,
+    MailmanConfigModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],

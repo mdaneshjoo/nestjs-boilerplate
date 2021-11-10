@@ -1,16 +1,13 @@
-import {
-  LoggerService,
-  ValidationPipe,
-  ValidationPipeOptions,
-} from '@nestjs/common';
+import { EyeService } from '@emdjoo/eye';
+import { ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import {
   DocumentBuilder,
-  SwaggerModule,
   SwaggerCustomOptions,
+  SwaggerModule,
 } from '@nestjs/swagger';
-import { AppModule } from './app.module';
 import * as helmet from 'helmet';
+import { AppModule } from './app.module';
 import { AuthService } from './app/auth/auth.service';
 import { PermissionsGuard } from './app/auth/guards/permission.guard';
 import { AppConfigService } from './config/app/config/config.service';
@@ -32,10 +29,13 @@ async function bootstrap() {
 
   const appConfigService = app.get<AppConfigService>(AppConfigService);
   const logger = app.resolve<HttpLoggerService>(HttpLoggerService);
+  const eye = app.get<EyeService>(EyeService);
 
   const authService = app.resolve<AuthService>(AuthService);
 
-  app.useGlobalFilters(new AllExceptionFilter(await logger, appConfigService));
+  app.useGlobalFilters(
+    new AllExceptionFilter(await logger, appConfigService, eye),
+  );
   app.useGlobalGuards(new PermissionsGuard(new Reflector(), await authService));
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe(validations));

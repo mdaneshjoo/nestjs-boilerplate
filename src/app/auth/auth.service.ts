@@ -1,9 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { ExtractJwt } from 'passport-jwt';
+import { UpdateResult } from 'typeorm';
+import { MailService } from '../../shared/module/mail/mail.service';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import {
+  ForgetPassConfirmErrorCodeEnum,
+  ForgetPassConfirmErrorMsgEnum,
+  ForgetPassConfirmSuccessMsgEnum,
+  ForgetPassErrorCodeEnum,
+  ForgetPassErrorMsgEnum,
+} from './auth.enum';
+import {
+  ForgetPassConfirmBodyInterface,
   PayloadInterface,
   SignUpBodyInterface,
 } from './interfaces/auth.interface';
@@ -13,11 +24,13 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private mail: MailService,
+    private schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.userService.findOne(email);
-    if (!user) return null;
+    if (!user || (user && !user.emailActive)) return null;
     const isMatch = await user.comparePassword(password);
     if (isMatch) return user;
     return null;
@@ -56,8 +69,45 @@ export class AuthService {
     return [...new Set(permissions)];
   }
 
-  async signUp(bodyData: SignUpBodyInterface): Promise<string> {
-    const user = await this.userService.create(bodyData);
-    return this.createToken(user);
+  async signUp(bodyData: SignUpBodyInterface): Promise<void> {
+    await this.userService.create(bodyData);
+  }
+
+  public async forgetPass(email: string): Promise<void> {
+    const user = await this.userService.findOne(email);
+    if (!user || (user && !user.emailActive))
+      throw new UnprocessableEntityException(
+        ForgetPassErrorMsgEnum.EMAIL_NOT_FOUND,
+        ForgetPassErrorCodeEnum.EMAIL_NOT_FOUND,
+      );
+    const forgetCode = Math.random().toString().slice(-6);
+    await this.userService.saveForget(email, forgetCode);
+    await this.mail.forgetMail(email, forgetCode);
+    this.addTimeout(user.workEmail, 60_000, email);
+  }
+
+  private addTimeout(name: string, milliseconds: number, email) {
+    const callback = async () => {
+      await this.userService.saveForget(email, null);
+    };
+
+    const timeout = setTimeout(callback, milliseconds);
+    this.schedulerRegistry.addTimeout(name, timeout);
+  }
+
+  public async forgetPassConfirm(
+    body: ForgetPassConfirmBodyInterface,
+  ): Promise<UpdateResult> {
+    const user = await this.userService.findOne(body.email);
+    if (
+      !user ||
+      (user && !user.forgetPassCode) ||
+      user.forgetPassCode !== body.code
+    )
+      throw new UnprocessableEntityException(
+        ForgetPassConfirmErrorMsgEnum.INVALID_CONFIRM_CODE,
+        ForgetPassConfirmErrorCodeEnum.INVALID_CONFIRM_CODE,
+      );
+    return this.userService.changePass(body.password, user);
   }
 }

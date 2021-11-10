@@ -1,3 +1,4 @@
+import { EyeService } from '@emdjoo/eye';
 import {
   ArgumentsHost,
   Catch,
@@ -6,10 +7,9 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
+import { Request } from 'express';
 import { AppConfigService } from '../../../config/app/config/config.service';
 import { HttpLoggerService } from '../logger/http-logger.service';
-import { Request } from 'express';
-
 @Catch()
 export class AllExceptionFilter
   extends BaseExceptionFilter
@@ -18,10 +18,12 @@ export class AllExceptionFilter
   constructor(
     private loggerService: HttpLoggerService,
     private appConfigService: AppConfigService,
+    private eye: EyeService,
   ) {
     super();
   }
   public catch(exception: any, host: ArgumentsHost): void {
+    this.eye.watchErrors(exception, host);
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>(),
       response = ctx.getResponse();

@@ -6,8 +6,14 @@ import {
   MinLength,
 } from 'class-validator';
 import { FailureDtoInterface } from '../../../shared/interfaces/failure-dto.interface';
+import { ResponseDtoInterface } from '../../../shared/interfaces/response-dto.interface';
 import { UserDto } from '../../user/dto';
-import { SignupErrorCodeEnum, SignupErrorMsgEnum } from '../auth.enum';
+import {
+  SignupErrorCodeEnum,
+  SignupErrorMsgEnum,
+  SignupSuccessCodeEnum,
+  SignupSuccessMsgEnum,
+} from '../auth.enum';
 import { LoginResponseDto } from './login.dto';
 
 export class SignupDto extends PickType(UserDto, [
@@ -36,7 +42,10 @@ export class SignupDto extends PickType(UserDto, [
   firstName: string;
 }
 
-export class SignUpResponseDto extends LoginResponseDto {}
+export class SignUpResponseDto implements ResponseDtoInterface {
+  successCode: SignupSuccessCodeEnum;
+  message: SignupSuccessMsgEnum;
+}
 
 export class SignUpFailureDto implements FailureDtoInterface {
   errorCode: SignupErrorCodeEnum;

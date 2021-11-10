@@ -1,12 +1,14 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { UpdateResult } from 'typeorm';
 import { AppConfigService } from '../../config/app/config/config.service';
 import { HttpLoggerService } from '../../shared/module/logger/http-logger.service';
+import { MailService } from '../../shared/module/mail/mail.service';
 import { Roles } from '../roles/entities/roles.entity';
 import { ConstRoles } from '../roles/role.enum';
 import { RolesService } from '../roles/roles.service';
 import { User } from './entities/user.entity';
 import { UserRepository } from './repositories/user.repository';
-
 import { CreateUserErrCodeEnum, CreateUserErrMsgEnum } from './user.enum';
 import { UserInterface } from './user.interface';
 
@@ -17,15 +19,17 @@ export class UserService {
     private appConfig: AppConfigService,
     private logger: HttpLoggerService,
     private roleService: RolesService,
+    private mail: MailService,
+    private schedulerRegistry: SchedulerRegistry,
   ) {
     logger.path = UserService.name;
   }
 
   async findOne(workEmail: string, phoneNumber?: string): Promise<User> {
-    let where = null;
-    if (phoneNumber) where = { phoneNumber };
+    let where: any[] = [{ workEmail }];
+    if (phoneNumber) where = [{ workEmail }, { phoneNumber }];
     return await this.userRepository.findOne({
-      where: [{ workEmail }, { ...where }],
+      where,
       relations: ['role', 'role.permissions'],
     });
   }
@@ -37,26 +41,25 @@ export class UserService {
         CreateUserErrMsgEnum.USER_DUPLICATE,
         CreateUserErrCodeEnum.USER_DUPLICATE,
       );
-    if (!user.password) {
-      user.password =
-        this.appConfig.MODE === 'DEV'
-          ? '123456789'
-          : Math.random().toString().slice(-8);
-      await this.sendEmail(user.password);
-      user.needChangePassword = true;
-    }
+
     const newUser = this.userRepository.create(user);
     newUser.role = user.rolesId
       ? user.rolesId
       : await this.getRolesByName(ConstRoles.User.roleName);
-    const createdUser = await this.userRepository.save(newUser, {
-      reload: true,
-    });
+    newUser.emailActive = this.appConfig.MODE === 'DEV';
+    const createdUser = await this.userRepository.save(newUser);
+
     this.logger.debug('user created.', {
       workEmail: createdUser.workEmail,
       role: createdUser.role,
     });
-    return await this.findOne(createdUser.workEmail);
+
+    await this.mail.greetEmail(createdUser.workEmail, {
+      confirmCode: createdUser.confirmCode,
+      name: createdUser.firstName,
+    });
+    this.addTimeout(createdUser.workEmail, 15 * 60_000, createdUser);
+    return createdUser;
   }
 
   private async getRolesByName(name: string): Promise<Array<Roles>> {
@@ -69,7 +72,27 @@ export class UserService {
     return roles;
   }
 
-  async sendEmail(msg): Promise<void> {
-    this.logger.debug('email sent', { msg });
+  async saveForget(email: string, code: string): Promise<UpdateResult> {
+    return this.userRepository.update(
+      { workEmail: email },
+      { forgetPassCode: code },
+    );
+  }
+
+  addTimeout(name: string, milliseconds: number, user: User) {
+    const callback = async () => {
+      const findUser = await this.findOne(user.workEmail);
+      if (!findUser.emailActive) await this.userRepository.remove(user);
+    };
+
+    const timeout = setTimeout(callback, milliseconds);
+    this.schedulerRegistry.addTimeout(name, timeout);
+  }
+
+  public changePass(newPassword: string, user: User): Promise<UpdateResult> {
+    return this.userRepository.update(
+      { workEmail: user.workEmail },
+      { password: newPassword },
+    );
   }
 }

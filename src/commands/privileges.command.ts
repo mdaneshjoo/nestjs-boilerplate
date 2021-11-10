@@ -28,7 +28,7 @@ export class PrivilegesCommands {
   @Command('create:superuser', { desc: 'create a super user' })
   async createSuperUser() {
     try {
-      const email = await PrivilegesCommands.getEmail();
+      const { email, password } = await PrivilegesCommands.getEmail();
       const existUser = await this.userService.findOne(email);
       if (existUser) throw new Error(CreateUserErrMsgEnum.USER_DUPLICATE);
       const role = await this.createRole(
@@ -41,10 +41,13 @@ export class PrivilegesCommands {
         workEmail: email,
         firstName: 'SuperUser',
         createdBy: 0,
+        password,
         rolesId: [{ id: role.id }],
       });
-      _cli.info('password sent to your email');
       _cli.success('superUser is created!');
+      _cli.info(
+        'we have sent you a confirmation link to your email .you have only 15 minute to use it',
+      );
     } catch (e) {
       return _cli.error(e.message);
     }
@@ -129,16 +132,24 @@ export class PrivilegesCommands {
       permission,
     );
   }
-  private static async getEmail(): Promise<string> {
+  private static async getEmail(): Promise<{
+    email: string;
+    password: string;
+  }> {
     const emailSchema = Joi.object({
       workEmail: Joi.string().email().required(),
+      password: Joi.string().required(),
     });
 
     const email = await _cli.ask('workEmail (pleas use valid email):');
-    const { error } = emailSchema.validate({ workEmail: email });
+    const password = await _cli.password('password:');
+    const { error } = emailSchema.validate({ workEmail: email, password });
 
     if (error) throw new Error(error.message);
 
-    return email;
+    return {
+      email,
+      password,
+    };
   }
 }

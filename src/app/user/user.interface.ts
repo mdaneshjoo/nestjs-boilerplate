@@ -6,4 +6,5 @@ export type UserInterface = UserDto & UserI & CommonEntity;
 interface UserI {
   password?: string;
   needChangePassword?: boolean;
+  emailActive?: boolean;
 }
