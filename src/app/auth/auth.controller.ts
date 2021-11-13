@@ -1,14 +1,6 @@
-import {
-  Body,
-  Controller,
-  Post,
-  Put,
-  Req,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { Public } from '../../shared/decorator/public-api.decorator';
 import {
   ForgetPassConfirmDec,
   ForgetPassDec,
@@ -27,11 +19,13 @@ import { AuthService } from './auth.service';
 import {
   ForgetPassConfirmDto,
   ForgetPassConfirmResponseDto,
+  ForgetPassDto,
+  ForgetPassResponseDto,
   LoginDto,
   LoginResponseDto,
+  SignupDto,
+  SignUpResponseDto,
 } from './dto';
-import { ForgetPassDto, ForgetPassResponseDto } from './dto/forget-pass.dto';
-import { SignupDto, SignUpResponseDto } from './dto/signup.dto';
 
 @ApiTags('auth')
 @Controller('v1/auth')
@@ -42,6 +36,7 @@ export class AuthController {
   @LoginDec()
   async login(
     @Req() req: Request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Body() body: LoginDto,
   ): Promise<LoginResponseDto> {
     const payload = this.authService.login(req.user);
@@ -62,6 +57,9 @@ export class AuthController {
 
   @Post('signup/confirm')
   async confirmSignup() {}
+
+  @Post('signup/resend-confirm')
+  async confirmSignupResend() {}
 
   @Post('forget-password')
   @ForgetPassDec()
@@ -85,17 +83,5 @@ export class AuthController {
       successCode: ForgetPassConfirmSuccessCodeEnum.CODE,
       message: ForgetPassConfirmSuccessMsgEnum.MESSAGE,
     };
-  }
-
-  @Put('change-password')
-  async changePass() {}
-
-  @Put('change-phone-number')
-  async changePhoneNumber() {}
-
-  @Put('change-email')
-  @Public()
-  async changeEmail() {
-    throw new UnprocessableEntityException('asdadasda');
   }
 }

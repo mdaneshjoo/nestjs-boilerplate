@@ -10,6 +10,7 @@ import { BaseExceptionFilter } from '@nestjs/core';
 import { Request } from 'express';
 import { AppConfigService } from '../../../config/app/config/config.service';
 import { HttpLoggerService } from '../logger/http-logger.service';
+
 @Catch()
 export class AllExceptionFilter
   extends BaseExceptionFilter
@@ -22,6 +23,7 @@ export class AllExceptionFilter
   ) {
     super();
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public catch(exception: any, host: ArgumentsHost): void {
     this.eye.watchErrors(exception, host);
     const ctx = host.switchToHttp();

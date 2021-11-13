@@ -46,3 +46,12 @@ export enum ForgetPassConfirmSuccessMsgEnum {
 export enum ForgetPassConfirmSuccessCodeEnum {
   CODE = 'FORGET_PASS_CONFIRMED',
 }
+
+export enum SignupConfirmErrorCodeEnum {}
+export enum SignupConfirmErrorMsgEnum {}
+export enum SignupConfirmSuccessMsgEnum {
+  MESSAGE = 'password successfully changed!',
+}
+export enum SignupConfirmSuccessCodeEnum {
+  CODE = 'FORGET_PASS_CONFIRMED',
+}

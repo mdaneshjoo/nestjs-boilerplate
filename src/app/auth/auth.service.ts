@@ -1,7 +1,6 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { ExtractJwt } from 'passport-jwt';
 import { UpdateResult } from 'typeorm';
 import { MailService } from '../../shared/module/mail/mail.service';
 import { User } from '../user/entities/user.entity';
@@ -9,7 +8,6 @@ import { UserService } from '../user/user.service';
 import {
   ForgetPassConfirmErrorCodeEnum,
   ForgetPassConfirmErrorMsgEnum,
-  ForgetPassConfirmSuccessMsgEnum,
   ForgetPassErrorCodeEnum,
   ForgetPassErrorMsgEnum,
 } from './auth.enum';
@@ -42,7 +40,7 @@ export class AuthService {
 
   /**
    * @desc create token for user
-   * TODO: need to check if user not have permission dont allow to signup and revert creating user (transaction)
+   *
    * */
   private createToken(user: User): string {
     const role = user.role.map((role) => {

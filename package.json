@@ -21,7 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "create:superuser": "node cli create:superuser",
     "create:permissions": "node cli create:permissions",
-    "create:default-role": "node cli create:default-role"
+    "create:default-role": "node cli create:default-role",
+    "compodoc": "npx compodoc -p tsconfig.doc.json"
   },
   "dependencies": {
     "@emdjoo/eye": "^1.0.2",
@@ -64,7 +65,7 @@
     "@types/bcrypt": "^5.0.0",
     "@types/cron": "^1.7.3",
     "@types/express": "^4.17.13",
-    "@types/jest": "^27.0.1",
+    "@types/jest": "^27.0.2",
     "@types/node": "^16.0.0",
     "@types/passport-jwt": "^3.0.6",
     "@types/passport-local": "^1.0.34",

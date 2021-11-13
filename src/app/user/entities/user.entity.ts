@@ -1,5 +1,4 @@
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { Exclude } from 'class-transformer';
 import {
@@ -10,7 +9,6 @@ import {
   JoinTable,
   ManyToMany,
 } from 'typeorm';
-import { AppConfigService } from '../../../config/app/config/config.service';
 import { CommonEntity } from '../../../shared/entities/common.entity';
 import { Roles } from '../../roles/entities/roles.entity';
 

@@ -1,6 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { MailmanOptions } from '@squareboat/nest-mailman';
 import * as path from 'path';
+
 export const MAIL_MAN = 'mailman';
 export default registerAs(MAIL_MAN, () => {
   return {

@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common';
-import { DataBaseConfigService } from './config.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import configuration from './configuration';
 import * as Joi from 'joi';
+import { DataBaseConfigService } from './config.service';
+import configuration from './configuration';
 
 @Global()
 @Module({

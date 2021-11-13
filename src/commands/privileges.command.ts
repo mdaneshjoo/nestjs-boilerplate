@@ -13,7 +13,6 @@ import {
   RolesRepository,
 } from '../app/roles/repositories/roles.repository';
 import { ConstRoles } from '../app/roles/role.enum';
-import { RolesService } from '../app/roles/roles.service';
 import { CreateUserErrMsgEnum } from '../app/user/user.enum';
 import { UserService } from '../app/user/user.service';
 

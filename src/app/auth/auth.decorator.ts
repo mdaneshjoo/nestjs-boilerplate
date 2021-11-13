@@ -119,3 +119,30 @@ export function ForgetPassConfirmDec() {
     }),
   );
 }
+
+export function SignupConfirmDec() {
+  return applyDecorators(
+    Public(),
+    ApiOperation({
+      summary: 'Signup Confirmation!',
+      description:
+        'after signup user receive an email to confirm account. with this api user can confirm its confirmation email',
+    }),
+    ApiOkResponse({
+      type: ForgetPassConfirmResponseDto,
+      description: 'password successfully changed',
+    }),
+    ApiBadRequestResponse({
+      type: BadRequestDto,
+      description: 'Bad request. Body properties are invalid.',
+    }),
+    ApiUnauthorizedResponse({
+      type: UnauthorizedDto,
+      description: 'Unauthorized.',
+    }),
+    ApiUnprocessableEntityResponse({
+      type: ForgetPassConfirmFailureDto,
+      description: 'Unprocessable request.',
+    }),
+  );
+}

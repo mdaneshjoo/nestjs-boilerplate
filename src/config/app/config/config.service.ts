@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+
 type Mode = 'DEV' | 'PROD';
 @Injectable()
 export class AppConfigService {

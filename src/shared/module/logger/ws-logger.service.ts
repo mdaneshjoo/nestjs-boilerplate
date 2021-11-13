@@ -25,7 +25,7 @@ export class WsLoggerService extends ConsoleLogger implements LoggerService {
   //   // WsException: WsException,
   // };
 
-  debug(message: string, meta?: any, userId?: string) {
+  debug(message: string, meta?: unknown, userId?: string) {
     this.winstonLogger.debug(message, {
       meta,
       context: this.context,
@@ -35,8 +35,9 @@ export class WsLoggerService extends ConsoleLogger implements LoggerService {
 
   error(
     message: string,
-    meta?: any,
+    meta?: unknown,
     userId?: string,
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     throwType = 'WsException',
   ) {
     if (meta) {

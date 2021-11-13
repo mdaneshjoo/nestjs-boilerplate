@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { CommonEntity } from '../../../shared/entities/common.entity';
 import { Permissions } from './permissions.entity';
 

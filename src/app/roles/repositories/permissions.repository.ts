@@ -6,7 +6,6 @@ import {
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Permissions } from '../entities/permissions.entity';
-import { Roles } from '../entities/roles.entity';
 import { FindOrCreateResult } from './roles.repository';
 
 @EntityRepository(Permissions)

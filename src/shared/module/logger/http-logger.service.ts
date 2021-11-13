@@ -3,7 +3,6 @@ import {
   Inject,
   Injectable,
   LoggerService,
-  Scope,
 } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger as WinstonLogger } from 'winston';
@@ -19,7 +18,7 @@ export class HttpLoggerService extends ConsoleLogger implements LoggerService {
     super();
   }
 
-  debug(message: string, meta?: any, context?: string) {
+  debug(message: string, meta?: unknown) {
     this.winstonLogger.debug(message, {
       meta,
       context: this._path,
@@ -30,7 +29,7 @@ export class HttpLoggerService extends ConsoleLogger implements LoggerService {
    * @description log errors
    *
    * */
-  error(errorType: ErrorType, message: string, meta?: any) {
+  error(errorType: ErrorType, message: string, meta?: unknown) {
     if (message) {
       this.winstonLogger.error(message, {
         meta: { type: errorType, path: this._path, MetaData: meta },

@@ -26,7 +26,10 @@ export class UserService {
   }
 
   async findOne(workEmail: string, phoneNumber?: string): Promise<User> {
-    let where: any[] = [{ workEmail }];
+    let where: [
+      email: { workEmail: string },
+      phonenumber?: { phoneNumber: string },
+    ] = [{ workEmail }];
     if (phoneNumber) where = [{ workEmail }, { phoneNumber }];
     return await this.userRepository.findOne({
       where,

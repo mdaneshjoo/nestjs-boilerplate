@@ -8,8 +8,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './app/auth/auth.module';
 import { JwtAuthGuard } from './app/auth/guards/jwt-auth.guard';
-import { CreditModule } from './app/employee/credit/credit.module';
-import { StacksModule } from './app/employee/stacks/stacks.module';
 import { ProfileModule } from './app/profile/profile.module';
 import { RolesModule } from './app/roles/roles.module';
 import { UserModule } from './app/user/user.module';
@@ -53,9 +51,7 @@ import { MailModule } from './shared/module/mail/mail.module';
       inject: [DataBaseConfigService],
     }),
     ScheduleModule.forRoot(),
-    StacksModule,
     ProfileModule,
-    CreditModule,
     AppConfigModule,
     CustomLoggerModule,
     PrivilegesModule,

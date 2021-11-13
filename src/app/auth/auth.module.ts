@@ -11,7 +11,6 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './passport/jwt.strategy';
 import { LocalStrategy } from './passport/local.strategy';
-import { PermissionsGuard } from './guards/permission.guard';
 
 @Global()
 @Module({

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Mailman, MailMessage } from '@squareboat/nest-mailman';
 import { AppConfigService } from '../../../config/app/config/config.service';
 import { GreetingBodyInterface } from './interface';
+
 @Injectable()
 export class MailService {
   constructor(private appConfigService: AppConfigService) {}

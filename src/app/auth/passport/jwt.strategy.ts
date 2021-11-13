@@ -12,6 +12,7 @@ export class JwtStrategy extends PassportStrategy(Jwt_Strategy) {
       secretOrKey: configService.SECRET,
     });
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async validate(payload: any) {
     return payload;
   }

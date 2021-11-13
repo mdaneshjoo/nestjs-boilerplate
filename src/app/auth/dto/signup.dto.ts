@@ -14,7 +14,6 @@ import {
   SignupSuccessCodeEnum,
   SignupSuccessMsgEnum,
 } from '../auth.enum';
-import { LoginResponseDto } from './login.dto';
 
 export class SignupDto extends PickType(UserDto, [
   'workEmail',
