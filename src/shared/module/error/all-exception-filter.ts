@@ -1,4 +1,3 @@
-import { EyeService } from '@emdjoo/eye';
 import {
   ArgumentsHost,
   Catch,
@@ -19,13 +18,11 @@ export class AllExceptionFilter
   constructor(
     private loggerService: HttpLoggerService,
     private appConfigService: AppConfigService,
-    private eye: EyeService,
   ) {
     super();
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public catch(exception: any, host: ArgumentsHost): void {
-    this.eye.watchErrors(exception, host);
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>(),
       response = ctx.getResponse();

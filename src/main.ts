@@ -1,4 +1,3 @@
-import { EyeService } from '@emdjoo/eye';
 import { ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import {
@@ -29,13 +28,10 @@ async function bootstrap() {
 
   const appConfigService = app.get<AppConfigService>(AppConfigService);
   const logger = app.resolve<HttpLoggerService>(HttpLoggerService);
-  const eye = app.get<EyeService>(EyeService);
 
   const authService = app.resolve<AuthService>(AuthService);
 
-  app.useGlobalFilters(
-    new AllExceptionFilter(await logger, appConfigService, eye),
-  );
+  app.useGlobalFilters(new AllExceptionFilter(await logger, appConfigService));
   app.useGlobalGuards(new PermissionsGuard(new Reflector(), await authService));
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe(validations));

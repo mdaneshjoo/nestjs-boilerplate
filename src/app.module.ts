@@ -1,4 +1,3 @@
-import { EyeModule, WebHookProviderEnum } from '@emdjoo/eye';
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
@@ -24,10 +23,6 @@ import { MailModule } from './shared/module/mail/mail.module';
     AuthModule,
     UserModule,
     HttpModule,
-    EyeModule.forRoot({
-      url: 'https://discord.com/api/webhooks/907688163760287754/3hl4vsEuvZnb84xqXnIsqb_apQRInHUQqKDw4Sn8h0ywgqOC7TwKXxG9z8a4_ksNr5mJ',
-      webHookProvider: WebHookProviderEnum.discord,
-    }),
     TypeOrmModule.forRootAsync({
       imports: [DataBaseConfigModule],
       useFactory: (dbConfigService: DataBaseConfigService) => ({
