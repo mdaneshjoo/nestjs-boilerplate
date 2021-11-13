@@ -41,7 +41,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe(validations));
   app.use(helmet());
   const config = new DocumentBuilder()
-    .setTitle('Webcentriq Profile API Documents.')
+    .setTitle(`${appConfigService.APP_NAME} API Documents.`)
     .setDescription('')
     .setVersion('1.0')
     .addBearerAuth()
@@ -51,7 +51,7 @@ async function bootstrap() {
     swaggerOptions: {
       persistAuthorization: true,
     },
-    customSiteTitle: 'Webcentriq Profile',
+    customSiteTitle: `${appConfigService.APP_NAME}`,
     customfavIcon: '',
   };
   SwaggerModule.setup('docs', app, document, customOptions);
