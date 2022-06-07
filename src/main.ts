@@ -22,7 +22,6 @@ async function bootstrap() {
   });
   const validations: ValidationPipeOptions = {
     // whitelist: true,
-    // forbidNonWhitelisted: true,
     transform: true,
   };
 
