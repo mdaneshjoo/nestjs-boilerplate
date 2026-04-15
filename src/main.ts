@@ -1,3 +1,4 @@
+import './instrument';
 import { ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import {
@@ -5,7 +6,8 @@ import {
   SwaggerCustomOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
-import * as helmet from 'helmet';
+import helmet from 'helmet';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AuthService } from './app/auth/auth.service';
 import { PermissionsGuard } from './app/auth/guards/permission.guard';
@@ -14,24 +16,23 @@ import { AllExceptionFilter } from './shared/module/error/all-exception-filter';
 import { HttpLoggerService } from './shared/module/logger/http-logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
 
   app.enableCors({
     origin: '*',
     allowedHeaders: '*',
   });
   const validations: ValidationPipeOptions = {
-    // whitelist: true,
     transform: true,
   };
 
   const appConfigService = app.get<AppConfigService>(AppConfigService);
-  const logger = app.resolve<HttpLoggerService>(HttpLoggerService);
+  const logger = await app.resolve<HttpLoggerService>(HttpLoggerService);
+  const authService = await app.resolve<AuthService>(AuthService);
 
-  const authService = app.resolve<AuthService>(AuthService);
-
-  app.useGlobalFilters(new AllExceptionFilter(await logger, appConfigService));
-  app.useGlobalGuards(new PermissionsGuard(new Reflector(), await authService));
+  app.useGlobalFilters(new AllExceptionFilter(logger, appConfigService));
+  app.useGlobalGuards(new PermissionsGuard(new Reflector(), authService));
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe(validations));
   app.use(helmet());

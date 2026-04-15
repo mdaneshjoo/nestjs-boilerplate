@@ -1,22 +1,26 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as Joi from 'joi';
+import { z } from 'zod';
 import { DataBaseConfigService } from './config.service';
 import configuration from './configuration';
+
+const dbSchema = z.object({
+  DB_HOST: z.string().min(1),
+  DB_NAME: z.string().min(1),
+  DB_PASSWORD: z.string().min(1),
+  DB_USERNAME: z.string().min(1),
+  DB_PORT: z.coerce.number().int().positive(),
+  SYNC: z
+    .union([z.literal('true'), z.literal('false'), z.boolean()])
+    .transform((v) => v === true || v === 'true'),
+});
 
 @Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
-      validationSchema: Joi.object({
-        DB_HOST: Joi.string().required(),
-        DB_NAME: Joi.string().required(),
-        DB_PASSWORD: Joi.string().required(),
-        DB_USERNAME: Joi.string().required(),
-        DB_PORT: Joi.string().required(),
-        SYNC: Joi.boolean().required(),
-      }),
+      validate: (env) => dbSchema.parse(env),
     }),
   ],
   providers: [ConfigService, DataBaseConfigService],

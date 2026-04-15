@@ -1,33 +1,38 @@
+import { Injectable } from '@nestjs/common';
 import {
+  DataSource,
   DeepPartial,
-  EntityRepository,
-  FindConditions,
+  FindOptionsWhere,
   Repository,
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Roles } from '../entities/roles.entity';
 
-@EntityRepository(Roles)
+@Injectable()
 export class RolesRepository extends Repository<Roles> {
+  constructor(dataSource: DataSource) {
+    super(Roles, dataSource.createEntityManager());
+  }
+
   async findOrCreate(
-    criteria: FindConditions<Roles>,
+    criteria: FindOptionsWhere<Roles>,
     role: QueryDeepPartialEntity<Roles> | QueryDeepPartialEntity<Roles>[],
   ): Promise<FindOrCreateResult<Roles>> {
     const foundRole = await this.findOne({ where: criteria });
     if (foundRole) return { created: false, result: foundRole };
-    const createdRole = await this.insertReturning<Roles>(role);
+    const createdRole = await this.insertReturning(role);
     return { created: true, result: createdRole };
   }
 
-  async insertReturning<T>(
-    role: QueryDeepPartialEntity<T> | QueryDeepPartialEntity<T>[],
+  async insertReturning(
+    role: QueryDeepPartialEntity<Roles> | QueryDeepPartialEntity<Roles>[],
   ) {
     const createdRole = await this.createQueryBuilder()
       .insert()
       .values(role)
       .returning('*')
       .execute();
-    return this.create(createdRole.generatedMaps[0] as DeepPartial<T>);
+    return this.create(createdRole.generatedMaps[0] as DeepPartial<Roles>);
   }
 }
 

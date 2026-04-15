@@ -1,52 +1,24 @@
-import {
-  ConsoleLogger,
-  Inject,
-  Injectable,
-  LoggerService,
-  Scope,
-} from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger as WinstonLogger } from 'winston';
+import { Injectable, Scope } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
 
 @Injectable({ scope: Scope.TRANSIENT })
-export class WsLoggerService extends ConsoleLogger implements LoggerService {
-  constructor(
-    @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly winstonLogger: WinstonLogger,
-  ) {
-    super();
-  }
-  context: string;
+export class WsLoggerService {
+  private _context: string;
+
+  constructor(private readonly logger: PinoLogger) {}
+
   setContext(context: string) {
-    this.context = context;
-    super.setContext(context);
+    this._context = context;
+    this.logger.setContext(context);
   }
-  // throwType = {
-  //   // WsException: WsException,
-  // };
 
   debug(message: string, meta?: unknown, userId?: string) {
-    this.winstonLogger.debug(message, {
-      meta,
-      context: this.context,
-      userId,
-    });
+    this.logger.debug({ meta, context: this._context, userId }, message);
   }
 
-  error(
-    message: string,
-    meta?: unknown,
-    userId?: string,
-    //eslint-disable-next-line @typescript-eslint/no-unused-vars
-    throwType = 'WsException',
-  ) {
+  error(message: string, meta?: unknown, userId?: string) {
     if (meta) {
-      this.winstonLogger.error(message, {
-        meta,
-        context: this.context,
-        userId,
-      });
-      // throw new this.throwType[throwType](meta);
+      this.logger.error({ meta, context: this._context, userId }, message);
     }
   }
 }

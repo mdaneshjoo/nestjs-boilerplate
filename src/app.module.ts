@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -20,6 +21,7 @@ import { MailModule } from './shared/module/mail/mail.module';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     AuthModule,
     UserModule,
     HttpModule,
@@ -34,14 +36,9 @@ import { MailModule } from './shared/module/mail/mail.module';
         database: dbConfigService.DB_NAME,
         entities: ['dist/**/*.entity{.ts,.js}'],
         synchronize: dbConfigService.SYNC,
-        charset: 'utf8mb4_unicode_ci',
         migrations: ['dist/db/migrations/*{.ts,.js}'],
         migrationsTableName: 'migrations',
         migrationsRun: false,
-        multipleStatements: true,
-        cli: {
-          migrationsDir: 'src/db/migrations',
-        },
       }),
       inject: [DataBaseConfigService],
     }),
@@ -55,6 +52,10 @@ import { MailModule } from './shared/module/mail/mail.module';
     MailModule,
   ],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: SentryGlobalFilter },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+  ],
 })
 export class AppModule {}

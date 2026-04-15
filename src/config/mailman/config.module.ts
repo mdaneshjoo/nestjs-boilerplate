@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as Joi from 'joi';
+import { z } from 'zod';
 import configuration from './configuration';
+
+const mailSchema = z.object({
+  MAIL_HOST: z.string().min(1),
+  MAIL_PORT: z.coerce.number().int().positive(),
+  MAIL_USERNAME: z.string().min(1),
+  MAIL_PASSWORD: z.string().min(1),
+  MAIL_FROM: z.string().min(1),
+});
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
-      validationSchema: Joi.object({
-        MAIL_HOST: Joi.string().required(),
-        MAIL_PORT: Joi.number().required(),
-        MAIL_USERNAME: Joi.string().required(),
-        MAIL_PASSWORD: Joi.string().required(),
-        MAIL_FROM: Joi.string().required(),
-      }),
+      validate: (env) => mailSchema.parse(env),
     }),
   ],
   providers: [ConfigService],

@@ -1,5 +1,5 @@
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 import { Exclude } from 'class-transformer';
 import {
   BeforeInsert,
@@ -67,6 +67,6 @@ export class User extends CommonEntity {
 
   @BeforeInsert()
   async beforeInsert() {
-    this.confirmCode = randomStringGenerator();
+    this.confirmCode = randomUUID();
   }
 }

@@ -45,9 +45,10 @@ export class AllExceptionFilter
     }
     const exceptionData = exception.getResponse();
     if (request?.body['password']) delete request?.body['password'];
+    const user = request['user'] as { id?: number } | undefined;
     this.loggerService.error('HttpException', exceptionData.message, {
       body: request?.body,
-      user: request.user?.id,
+      user: user?.id,
     });
 
     response.status(status).json({

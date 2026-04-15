@@ -1,6 +1,6 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { UpdateResult } from 'typeorm';
+import { FindOptionsWhere, UpdateResult } from 'typeorm';
 import { AppConfigService } from '../../config/app/config/config.service';
 import { HttpLoggerService } from '../../shared/module/logger/http-logger.service';
 import { MailService } from '../../shared/module/mail/mail.service';
@@ -26,11 +26,9 @@ export class UserService {
   }
 
   async findOne(workEmail: string, phoneNumber?: string): Promise<User> {
-    let where: [
-      email: { workEmail: string },
-      phonenumber?: { phoneNumber: string },
-    ] = [{ workEmail }];
-    if (phoneNumber) where = [{ workEmail }, { phoneNumber }];
+    const where: FindOptionsWhere<User>[] = phoneNumber
+      ? [{ workEmail }, { phoneNumber }]
+      : [{ workEmail }];
     return await this.userRepository.findOne({
       where,
       relations: ['role', 'role.permissions'],

@@ -1,40 +1,24 @@
-import {
-  ConsoleLogger,
-  Inject,
-  Injectable,
-  LoggerService,
-} from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger as WinstonLogger } from 'winston';
-// Types
+import { Injectable, Scope } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
+
 type ErrorType = 'Internal' | 'HttpException';
-@Injectable()
-export class HttpLoggerService extends ConsoleLogger implements LoggerService {
+
+@Injectable({ scope: Scope.TRANSIENT })
+export class HttpLoggerService {
   private _path: string;
-  constructor(
-    @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly winstonLogger: WinstonLogger,
-  ) {
-    super();
-  }
+
+  constructor(private readonly logger: PinoLogger) {}
 
   debug(message: string, meta?: unknown) {
-    this.winstonLogger.debug(message, {
-      meta,
-      context: this._path,
-    });
+    this.logger.debug({ meta, context: this._path }, message);
   }
 
-  /**
-   * @description log errors
-   *
-   * */
   error(errorType: ErrorType, message: string, meta?: unknown) {
-    if (message) {
-      this.winstonLogger.error(message, {
-        meta: { type: errorType, path: this._path, MetaData: meta },
-      });
-    }
+    if (!message) return;
+    this.logger.error(
+      { type: errorType, path: this._path, MetaData: meta },
+      message,
+    );
   }
 
   set path(path: string) {

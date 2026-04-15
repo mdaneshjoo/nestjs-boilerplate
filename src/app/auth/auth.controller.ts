@@ -39,7 +39,7 @@ export class AuthController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Body() body: LoginDto,
   ): Promise<LoginResponseDto> {
-    const payload = this.authService.login(req.user);
+    const payload = this.authService.login(req.user as never);
     return {
       access_token: payload,
     };

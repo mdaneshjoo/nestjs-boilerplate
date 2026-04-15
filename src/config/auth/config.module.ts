@@ -1,18 +1,20 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as Joi from 'joi';
+import { z } from 'zod';
 import { AuthConfigService } from './config.service';
 import configuration from './configuration';
+
+const authSchema = z.object({
+  EXPIRE: z.string().min(1),
+  SECRET: z.string().min(1),
+});
 
 @Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
-      validationSchema: Joi.object({
-        EXPIRE: Joi.string().required(),
-        SECRET: Joi.string().required(),
-      }),
+      validate: (env) => authSchema.parse(env),
     }),
   ],
   providers: [ConfigService, AuthConfigService],

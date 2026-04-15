@@ -25,8 +25,9 @@ import { LocalStrategy } from './passport/local.strategy';
       ) => ({
         secret: authConfigService.SECRET,
         signOptions: {
-          expiresIn:
-            appConfigService.MODE === 'PROD' ? authConfigService.EXPIRE : '1y',
+          expiresIn: (appConfigService.MODE === 'PROD'
+            ? authConfigService.EXPIRE
+            : '1y') as `${number}${'s' | 'm' | 'h' | 'd' | 'y'}`,
         },
       }),
       inject: [AuthConfigService, AppConfigService],
