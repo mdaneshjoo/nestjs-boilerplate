@@ -1,4 +1,8 @@
-import { Injectable, Logger, UnprocessableEntityException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { NotificationChannel } from '../notification.enum';
 import {
   INotificationChannel,
@@ -21,8 +25,6 @@ export class SmsChannel implements INotificationChannel {
       );
     }
     // TODO: integrate an SMS provider (Twilio, Vonage, Kavenegar, ...)
-    this.logger.log(
-      `[stub] SMS to ${recipient.phoneNumber}: ${payload.body}`,
-    );
+    this.logger.log(`[stub] SMS to ${recipient.phoneNumber}: ${payload.body}`);
   }
 }

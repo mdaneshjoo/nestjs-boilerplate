@@ -90,7 +90,7 @@ export class PgStream extends Writable {
       })
       .catch((err) => {
         process.stderr.write(
-          `[PgStream] FAILED to initialise log table "${opts.table}": ${err instanceof Error ? err.stack ?? err.message : err}\n`,
+          `[PgStream] FAILED to initialise log table "${opts.table}": ${err instanceof Error ? (err.stack ?? err.message) : err}\n`,
         );
         throw err;
       });

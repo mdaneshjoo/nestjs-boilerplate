@@ -68,7 +68,33 @@ if [ -n "$HITS" ]; then
 fi
 pass "no secrets detected"
 
-# ── 4. gitleaks (binary → Docker fallback, required) ──────────────────────
+# ── 4. gitleaks (binary → Docker fallback; missing = warn with install guide) ─
+print_gitleaks_install_guide() {
+  cat >&2 <<'EOF'
+
+──────────────────────────────────────────────────────────────
+⚠ gitleaks not available — deeper secret scan skipped.
+
+Install the binary once (recommended — fast, offline, cross-OS):
+  macOS            : brew install gitleaks
+  Linux (Homebrew) : brew install gitleaks
+  Debian/Ubuntu    : https://github.com/gitleaks/gitleaks/releases
+                     wget <release>.tar.gz && tar -xzf ... && sudo mv gitleaks /usr/local/bin/
+  Arch             : pacman -S gitleaks
+  Fedora           : dnf install gitleaks
+  Windows          : scoop install gitleaks  |  choco install gitleaks
+  Go toolchain     : go install github.com/gitleaks/gitleaks/v8@latest
+
+Or run via Docker (image must be pullable or pre-cached):
+  docker pull zricethezav/gitleaks:latest
+  (the hook will then use it automatically)
+
+Releases: https://github.com/gitleaks/gitleaks/releases
+Docs    : https://github.com/gitleaks/gitleaks
+──────────────────────────────────────────────────────────────
+EOF
+}
+
 info "Running gitleaks..."
 run_gitleaks() {
   "$@" >/tmp/gitleaks.log 2>&1
@@ -76,18 +102,29 @@ run_gitleaks() {
 }
 GL_MODE=""
 GL_EXIT=0
+GL_RAN=0
 if command -v gitleaks >/dev/null 2>&1; then
   GL_MODE="binary"
+  GL_RAN=1
   run_gitleaks gitleaks detect --no-banner --redact --source . || GL_EXIT=$?
 elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-  GL_MODE="docker"
-  run_gitleaks docker run --rm -v "$(pwd):/path" zricethezav/gitleaks:latest \
-    detect --no-banner --redact --source /path || GL_EXIT=$?
-else
-  fail "gitleaks required: install via \`brew install gitleaks\` (or scoop/choco/apt/go) OR start Docker Desktop/Engine"
+  # Only attempt Docker if the image is already cached (avoids blocking
+  # pushes when the registry is unreachable). Pre-pull via:
+  #   docker pull zricethezav/gitleaks:latest
+  if docker image inspect zricethezav/gitleaks:latest >/dev/null 2>&1; then
+    GL_MODE="docker"
+    GL_RAN=1
+    run_gitleaks docker run --rm -v "$(pwd):/path" zricethezav/gitleaks:latest \
+      detect --no-banner --redact --source /path || GL_EXIT=$?
+  fi
 fi
-# gitleaks exit codes: 0 = clean, 1 = leaks found, other = runtime error
-if [ "$GL_EXIT" -eq 0 ]; then
+
+if [ "$GL_RAN" -eq 0 ]; then
+  # Soft-fail: print install guide and continue. The regex scan above still
+  # ran, so this is a degraded-but-not-open state.
+  echo -e "${YELLOW}✗ gitleaks skipped (not installed / image not cached)${NC}" >&2
+  print_gitleaks_install_guide
+elif [ "$GL_EXIT" -eq 0 ]; then
   pass "gitleaks clean ($GL_MODE)"
 elif [ "$GL_EXIT" -eq 1 ]; then
   cat /tmp/gitleaks.log

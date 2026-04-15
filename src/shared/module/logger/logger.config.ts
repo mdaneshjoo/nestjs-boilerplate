@@ -5,13 +5,7 @@ import { z } from 'zod';
  * A destination at level "warn" receives warn/error/fatal (pino's standard
  * minimum-level semantics), not only warn.
  */
-export const LOG_LEVELS = [
-  'debug',
-  'info',
-  'warn',
-  'error',
-  'fatal',
-] as const;
+export const LOG_LEVELS = ['debug', 'info', 'warn', 'error', 'fatal'] as const;
 
 const levelSchema = z.union([z.enum(LOG_LEVELS), z.literal('off')]);
 
@@ -46,8 +40,6 @@ export type LoggerEnv = z.infer<typeof loggerEnvSchema>;
  * @param env - an env-like record, defaults to `process.env`.
  * @returns fully-defaulted {@link LoggerEnv}.
  */
-export function loadLoggerEnv(
-  env: NodeJS.ProcessEnv = process.env,
-): LoggerEnv {
+export function loadLoggerEnv(env: NodeJS.ProcessEnv = process.env): LoggerEnv {
   return loggerEnvSchema.parse(env);
 }
