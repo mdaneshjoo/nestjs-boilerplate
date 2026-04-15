@@ -11,7 +11,6 @@ import { JwtAuthGuard } from './app/auth/guards/jwt-auth.guard';
 import { ProfileModule } from './app/profile/profile.module';
 import { RolesModule } from './app/roles/roles.module';
 import { UserModule } from './app/user/user.module';
-import { PrivilegesModule } from './commands/privileges.module';
 import { AppConfigModule } from './config/app/config/config.module';
 import { DataBaseConfigModule } from './config/database/config.module';
 import { DataBaseConfigService } from './config/database/config.service';
@@ -46,7 +45,6 @@ import { NotificationModule } from './shared/module/notification/notification.mo
     ProfileModule,
     AppConfigModule,
     CustomLoggerModule,
-    PrivilegesModule,
     RolesModule,
     MailmanConfigModule,
     NotificationModule,
