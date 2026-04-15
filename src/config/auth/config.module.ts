@@ -1,20 +1,16 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { z } from 'zod';
+import { validateEnv } from '../validate-env';
 import { AuthConfigService } from './config.service';
+import { authSchema } from './config.schema';
 import configuration from './configuration';
-
-const authSchema = z.object({
-  EXPIRE: z.string().min(1),
-  SECRET: z.string().min(1),
-});
 
 @Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
-      validate: (env) => authSchema.parse(env),
+      validate: validateEnv(authSchema),
     }),
   ],
   providers: [ConfigService, AuthConfigService],

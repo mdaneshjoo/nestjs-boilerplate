@@ -3,7 +3,8 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { FindOptionsWhere, UpdateResult } from 'typeorm';
 import { AppConfigService } from '../../config/app/config/config.service';
 import { HttpLoggerService } from '../../shared/module/logger/http-logger.service';
-import { MailService } from '../../shared/module/mail/mail.service';
+import { NotificationChannel } from '../../shared/module/notification/notification.enum';
+import { NotificationService } from '../../shared/module/notification/notification.service';
 import { Roles } from '../roles/entities/roles.entity';
 import { ConstRoles } from '../roles/role.enum';
 import { RolesService } from '../roles/roles.service';
@@ -19,7 +20,7 @@ export class UserService {
     private appConfig: AppConfigService,
     private logger: HttpLoggerService,
     private roleService: RolesService,
-    private mail: MailService,
+    private notifications: NotificationService,
     private schedulerRegistry: SchedulerRegistry,
   ) {
     logger.path = UserService.name;
@@ -55,10 +56,7 @@ export class UserService {
       role: createdUser.role,
     });
 
-    await this.mail.greetEmail(createdUser.workEmail, {
-      confirmCode: createdUser.confirmCode,
-      name: createdUser.firstName,
-    });
+    await this.sendGreetingEmail(createdUser);
     this.addTimeout(createdUser.workEmail, 15 * 60_000, createdUser);
     return createdUser;
   }
@@ -95,5 +93,25 @@ export class UserService {
       { workEmail: user.workEmail },
       { password: newPassword },
     );
+  }
+
+  private async sendGreetingEmail(user: User): Promise<void> {
+    const appName = this.appConfig.APP_NAME;
+    const confirmUrl = `${this.appConfig.CLIENT_URL}/${user.confirmCode}`;
+    await this.notifications.send({
+      channels: [NotificationChannel.EMAIL],
+      recipient: { email: user.workEmail, userId: user.id },
+      payload: {
+        subject: `${appName} Greeting`,
+        body: `Hello ${user.firstName}. Welcome to ${appName}. Confirm your email: ${confirmUrl}`,
+        html: `
+          <p>Hello ${user.firstName}</p>
+          <p>Welcome To ${appName}</p>
+          <p>Note: For completing your signup you should confirm your email. Please press the CONFIRM button.</p>
+          <p>Attention! This link expires in 15 minutes.</p>
+          <p><a href="${confirmUrl}">CONFIRM</a></p>
+        `,
+      },
+    });
   }
 }

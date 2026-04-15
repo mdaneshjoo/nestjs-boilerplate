@@ -68,16 +68,33 @@ if [ -n "$HITS" ]; then
 fi
 pass "no secrets detected"
 
-# ── 4. gitleaks (if installed, deeper scan) ───────────────────────────────
+# ── 4. gitleaks (binary → Docker fallback, required) ──────────────────────
+info "Running gitleaks..."
+run_gitleaks() {
+  "$@" >/tmp/gitleaks.log 2>&1
+  return $?
+}
+GL_MODE=""
+GL_EXIT=0
 if command -v gitleaks >/dev/null 2>&1; then
-  info "Running gitleaks..."
-  if ! gitleaks detect --no-banner --redact --source . >/tmp/gitleaks.log 2>&1; then
-    cat /tmp/gitleaks.log
-    fail "gitleaks found leaked secrets"
-  fi
-  pass "gitleaks clean"
+  GL_MODE="binary"
+  run_gitleaks gitleaks detect --no-banner --redact --source . || GL_EXIT=$?
+elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+  GL_MODE="docker"
+  run_gitleaks docker run --rm -v "$(pwd):/path" zricethezav/gitleaks:latest \
+    detect --no-banner --redact --source /path || GL_EXIT=$?
 else
-  info "gitleaks not installed (skipping deeper scan — brew install gitleaks)"
+  fail "gitleaks required: install via \`brew install gitleaks\` (or scoop/choco/apt/go) OR start Docker Desktop/Engine"
+fi
+# gitleaks exit codes: 0 = clean, 1 = leaks found, other = runtime error
+if [ "$GL_EXIT" -eq 0 ]; then
+  pass "gitleaks clean ($GL_MODE)"
+elif [ "$GL_EXIT" -eq 1 ]; then
+  cat /tmp/gitleaks.log
+  fail "gitleaks found leaked secrets"
+else
+  cat /tmp/gitleaks.log
+  fail "gitleaks failed to run ($GL_MODE, exit=$GL_EXIT) — check network / Docker"
 fi
 
 # ── 5. Unsafe code patterns ───────────────────────────────────────────────

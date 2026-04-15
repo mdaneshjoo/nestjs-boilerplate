@@ -17,7 +17,7 @@ import { DataBaseConfigModule } from './config/database/config.module';
 import { DataBaseConfigService } from './config/database/config.service';
 import { MailmanConfigModule } from './config/mailman/config.module';
 import { CustomLoggerModule } from './shared/module/logger/logger.module';
-import { MailModule } from './shared/module/mail/mail.module';
+import { NotificationModule } from './shared/module/notification/notification.module';
 
 @Module({
   imports: [
@@ -49,7 +49,7 @@ import { MailModule } from './shared/module/mail/mail.module';
     PrivilegesModule,
     RolesModule,
     MailmanConfigModule,
-    MailModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

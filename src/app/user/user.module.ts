@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppConfigModule } from '../../config/app/config/config.module';
-import { MailModule } from '../../shared/module/mail/mail.module';
+import { NotificationModule } from '../../shared/module/notification/notification.module';
 import { RolesModule } from '../roles/roles.module';
 import { User } from './entities/user.entity';
 import { UserRepository } from './repositories/user.repository';
@@ -13,7 +13,7 @@ import { UserService } from './user.service';
     TypeOrmModule.forFeature([User]),
     AppConfigModule,
     RolesModule,
-    MailModule,
+    NotificationModule,
   ],
   providers: [UserService, UserRepository],
   exports: [UserService, UserRepository],

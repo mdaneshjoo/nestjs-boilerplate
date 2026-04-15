@@ -105,6 +105,8 @@ You are a Senior Backend Developer and an Expert in NestJS, TypeScript, Node.js,
 - Add Swagger decorators to all DTOs.
 - Validate dates with timezone awareness.
 - Validate **environment/config** with **Zod** schemas passed to `ConfigModule.forRoot({ validate })`.
+- **Each Zod schema MUST live in its own file** named `config.schema.ts` (or `<name>.schema.ts`) next to the consuming module. Do not inline schemas inside `*.module.ts`. Export both the schema and its inferred type: `export type AppEnv = z.infer<typeof appSchema>;`.
+- Wrap the schema in the shared `validateEnv(schema)` helper (`src/config/validate-env.ts`) so validation errors are human-readable.
 
 ## Authentication & Authorization
 
@@ -177,7 +179,47 @@ this.appConfig.MODE; // DEV | PROD
 - Single quotes, semicolons, trailing commas in multiline objects.
 - Avoid `any`. Strict type checking. SOLID.
 - No `console.log` in production. Fix all lint warnings.
-- Small, focused functions. JSDoc for non-obvious logic.
+- Small, focused functions.
+
+## Code Comments (MUST FOLLOW)
+
+Every JavaScript/TypeScript function, method, class, and non-trivial code block MUST be documented with JSDoc. The goal is that a new developer can understand intent without reading the implementation.
+
+**Required on every function/method:**
+
+```typescript
+/**
+ * <One-line summary of what the function does.>
+ *
+ * <Longer paragraph explaining HOW it works — the algorithm, the business
+ *  rule, the side effects, the ordering, why branches exist. Reference
+ *  other collaborators by name (e.g. "delegates persistence to
+ *  UserRepository.save"). Note anything surprising: transactions,
+ *  timeouts, event emissions, mutations of input.>
+ *
+ * @param name - <what the argument represents, and any constraints>
+ * @returns <what is returned and under what conditions>
+ * @throws {ExceptionType} <when and why>
+ * @example
+ *   const token = authService.login(user);
+ */
+```
+
+**Also required:**
+
+- **Classes**: top-of-class JSDoc stating the class's responsibility and lifecycle.
+- **Exported types/interfaces/enums**: JSDoc on the declaration and on every field that isn't self-explanatory.
+- **Complex blocks inside a function**: a line comment (`// ...`) above the block explaining the intent, not the mechanics. Focus on the *why*.
+- **Regex, bit math, non-obvious conditionals**: always commented.
+- **TODO / FIXME / HACK**: include author, date, and the condition for removal.
+
+**Do NOT:**
+
+- Restate the code (`// increment i` above `i++`).
+- Leave auto-generated Nest scaffolding comments in committed code.
+- Write English that contradicts the code — update the comment when the code changes.
+
+Recommended tooling: `eslint-plugin-jsdoc` with `require-jsdoc` on exported declarations so the rule is enforced in CI.
 
 ## Git Conventions
 

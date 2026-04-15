@@ -2,7 +2,9 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { UpdateResult } from 'typeorm';
-import { MailService } from '../../shared/module/mail/mail.service';
+import { AppConfigService } from '../../config/app/config/config.service';
+import { NotificationChannel } from '../../shared/module/notification/notification.enum';
+import { NotificationService } from '../../shared/module/notification/notification.service';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import {
@@ -22,7 +24,8 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-    private mail: MailService,
+    private notifications: NotificationService,
+    private appConfig: AppConfigService,
     private schedulerRegistry: SchedulerRegistry,
   ) {}
 
@@ -80,7 +83,7 @@ export class AuthService {
       );
     const forgetCode = Math.random().toString().slice(-6);
     await this.userService.saveForget(email, forgetCode);
-    await this.mail.forgetMail(email, forgetCode);
+    await this.sendForgetPasswordEmail(email, forgetCode);
     this.addTimeout(user.workEmail, 60_000, email);
   }
 
@@ -107,5 +110,26 @@ export class AuthService {
         ForgetPassConfirmErrorCodeEnum.INVALID_CONFIRM_CODE,
       );
     return this.userService.changePass(body.password, user);
+  }
+
+  private async sendForgetPasswordEmail(
+    email: string,
+    forgetCode: string,
+  ): Promise<void> {
+    const appName = this.appConfig.APP_NAME;
+    await this.notifications.send({
+      channels: [NotificationChannel.EMAIL],
+      recipient: { email },
+      payload: {
+        subject: `${appName} Forget Password Confirmation`,
+        body: `Your confirm code is ${forgetCode}`,
+        html: `
+          <p>Greeting</p>
+          <p>Your confirm code is</p>
+          <p><strong>${forgetCode}</strong></p>
+          <p>Summary: you got this email because you forgot your password. If you don't want to change your password, ignore this email.</p>
+        `,
+      },
+    });
   }
 }

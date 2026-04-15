@@ -5,7 +5,7 @@ import { AppConfigModule } from '../../config/app/config/config.module';
 import { AppConfigService } from '../../config/app/config/config.service';
 import { AuthConfigModule } from '../../config/auth/config.module';
 import { AuthConfigService } from '../../config/auth/config.service';
-import { MailModule } from '../../shared/module/mail/mail.module';
+import { NotificationModule } from '../../shared/module/notification/notification.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -32,7 +32,7 @@ import { LocalStrategy } from './passport/local.strategy';
       }),
       inject: [AuthConfigService, AppConfigService],
     }),
-    MailModule,
+    NotificationModule,
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy, AuthConfigService],
   controllers: [AuthController],
