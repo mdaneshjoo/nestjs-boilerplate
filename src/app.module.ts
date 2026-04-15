@@ -15,6 +15,7 @@ import { AppConfigModule } from './config/app/config/config.module';
 import { DataBaseConfigModule } from './config/database/config.module';
 import { DataBaseConfigService } from './config/database/config.service';
 import { MailmanConfigModule } from './config/mailman/config.module';
+import { AllExceptionFilter } from './shared/module/error/all-exception-filter';
 import { CustomLoggerModule } from './shared/module/logger/logger.module';
 import { NotificationModule } from './shared/module/notification/notification.module';
 
@@ -53,6 +54,7 @@ import { NotificationModule } from './shared/module/notification/notification.mo
   providers: [
     AppService,
     { provide: APP_FILTER, useClass: SentryGlobalFilter },
+    { provide: APP_FILTER, useClass: AllExceptionFilter },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
 })

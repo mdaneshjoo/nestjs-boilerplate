@@ -12,8 +12,6 @@ import { AppModule } from './app.module';
 import { AuthService } from './app/auth/auth.service';
 import { PermissionsGuard } from './app/auth/guards/permission.guard';
 import { AppConfigService } from './config/app/config/config.service';
-import { AllExceptionFilter } from './shared/module/error/all-exception-filter';
-import { HttpLoggerService } from './shared/module/logger/http-logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -28,10 +26,8 @@ async function bootstrap() {
   };
 
   const appConfigService = app.get<AppConfigService>(AppConfigService);
-  const logger = await app.resolve<HttpLoggerService>(HttpLoggerService);
   const authService = await app.resolve<AuthService>(AuthService);
 
-  app.useGlobalFilters(new AllExceptionFilter(logger, appConfigService));
   app.useGlobalGuards(new PermissionsGuard(new Reflector(), authService));
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe(validations));

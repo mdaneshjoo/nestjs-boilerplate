@@ -1,8 +1,8 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { FindOptionsWhere, UpdateResult } from 'typeorm';
 import { AppConfigService } from '../../config/app/config/config.service';
-import { HttpLoggerService } from '../../shared/module/logger/http-logger.service';
 import { NotificationChannel } from '../../shared/module/notification/notification.enum';
 import { NotificationService } from '../../shared/module/notification/notification.service';
 import { Roles } from '../roles/entities/roles.entity';
@@ -18,13 +18,12 @@ export class UserService {
   constructor(
     private userRepository: UserRepository,
     private appConfig: AppConfigService,
-    private logger: HttpLoggerService,
+    @InjectPinoLogger(UserService.name)
+    private readonly logger: PinoLogger,
     private roleService: RolesService,
     private notifications: NotificationService,
     private schedulerRegistry: SchedulerRegistry,
-  ) {
-    logger.path = UserService.name;
-  }
+  ) {}
 
   async findOne(workEmail: string, phoneNumber?: string): Promise<User> {
     const where: FindOptionsWhere<User>[] = phoneNumber
@@ -51,10 +50,10 @@ export class UserService {
     newUser.emailActive = this.appConfig.MODE === 'DEV';
     const createdUser = await this.userRepository.save(newUser);
 
-    this.logger.debug('user created.', {
-      workEmail: createdUser.workEmail,
-      role: createdUser.role,
-    });
+    this.logger.debug(
+      { workEmail: createdUser.workEmail, role: createdUser.role },
+      'user created.',
+    );
 
     await this.sendGreetingEmail(createdUser);
     this.addTimeout(createdUser.workEmail, 15 * 60_000, createdUser);
