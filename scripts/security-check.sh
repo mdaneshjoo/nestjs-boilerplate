@@ -55,7 +55,7 @@ PATTERNS=(
   'AIza[0-9A-Za-z_-]{35}'
 )
 
-DIFF=$(git diff "$RANGE" -- . ':(exclude)package-lock.json' ':(exclude)*.lock' 2>/dev/null || git diff HEAD -- . ':(exclude)package-lock.json')
+DIFF=$(git diff "$RANGE" -- . ':(exclude)package-lock.json' ':(exclude)*.lock' ':(exclude).env.example' ':(exclude)*.env.example' 2>/dev/null || git diff HEAD -- . ':(exclude)package-lock.json' ':(exclude).env.example')
 HITS=""
 for p in "${PATTERNS[@]}"; do
   MATCH=$(echo "$DIFF" | grep -E "^\+" | grep -iE -- "$p" || true)
