@@ -8,9 +8,6 @@ export interface PayloadInterface {
   iat: number;
   exp: number;
 }
-export type SignUpBodyInterface = SignUpBodyI & SignupDto;
-interface SignUpBodyI {}
+export type SignUpBodyInterface = SignupDto;
 
-export type ForgetPassConfirmBodyInterface = ForgetPassConfirmDto &
-  ForgetPassConfirmBodyI;
-interface ForgetPassConfirmBodyI {}
+export type ForgetPassConfirmBodyInterface = ForgetPassConfirmDto;

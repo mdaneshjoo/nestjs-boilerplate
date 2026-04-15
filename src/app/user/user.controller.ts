@@ -9,7 +9,6 @@ export class UserController {
   @Post('')
   @CreateUserDec()
   @RequirePermissions(PermissionsEnum.CREATE_USER)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async createUser(@Body() body: CreateUserDto) {
     return 'not complete yet';
   }

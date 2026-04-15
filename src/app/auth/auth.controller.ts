@@ -36,7 +36,7 @@ export class AuthController {
   @LoginDec()
   async login(
     @Req() req: Request,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     @Body() body: LoginDto,
   ): Promise<LoginResponseDto> {
     const payload = this.authService.login(req.user as never);

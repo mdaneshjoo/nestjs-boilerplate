@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DataSource,
-  DeepPartial,
-  FindOptionsWhere,
-  Repository,
-} from 'typeorm';
+import { DataSource, DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Roles } from '../entities/roles.entity';
 
